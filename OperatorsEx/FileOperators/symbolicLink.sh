@@ -21,4 +21,4 @@ else
 fi
 #Both operator used to know if a file
 # is a SYmbolic Link 
-#(In this case it will print "It is a symbolic link." Twise)
+#(In this case it will print output twise)
