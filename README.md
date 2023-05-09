@@ -4,3 +4,4 @@ This is a repository that contains some bash Scripts, organized in directories, 
 ### Directories that you will find:
 - OperatorsEx (dir: contains Bash Operators practising Exercises files, conain 74 bash operators examples).
 - OperatorsEx2 (dir: Contains more Bash operators examples combined).
+-OverTheWire levels: Over the Wire bash exercises.
