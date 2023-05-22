@@ -6,4 +6,4 @@ nmap --open -T5 -p31000-32000 127.0.0.1
 openssl s_client -connect 127.0.0.1:[port speaks ssl]
 
 #enter the $(cat /etc/bandit_pass/bandit16)
-#you will get a ssd]h privatekey and you can log in creating a id_rsa in a /tmp
+#you will get a ssh privatekey and you can log in creating a id_rsa in a /tmp
