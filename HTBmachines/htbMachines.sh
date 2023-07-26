@@ -18,4 +18,16 @@ function ctrl_c(){
 #Ctrl_c
 trap ctrl_c INT
 
-sleep 10
+function helpPanel(){
+  echo -e "\n\n ${grayColor} [*] panel help ${endColor}\n"
+}
+
+#Indicator
+declare -i parameter_counter
+
+while getopts "m:h" arg; do
+  case $arg in
+    m) let parameter_counter+=1;;
+    h) helpPanel;;
+  esac
+done
