@@ -22,12 +22,22 @@ function helpPanel(){
   echo -e "\n\n ${grayColor} [*] panel help ${endColor}\n"
 }
 
+function searchMachine(){
+  echo "searching $1"
+}
+
 #Indicator
-declare -i parameter_counter
+declare -i parameter_counter=0
 
 while getopts "m:h" arg; do
   case $arg in
-    m) let parameter_counter+=1;;
+    m) machine_name=$OPTARG; let parameter_counter+=1;;
     h) helpPanel;;
   esac
 done
+
+if [ $parameter_counter -eq 1 ]; then
+  searchMachine $machine_name
+else
+  helpPanel
+fi
