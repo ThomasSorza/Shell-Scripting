@@ -13,6 +13,7 @@ grayColor="\e[0;37m\033[1m"
 #Global Variables
 main_link="https://htbmachines.github.io/bundle.js"
 bundle="./data/bundle.js"
+temp="./data/bundle_temp.js"
 
 function ctrl_c(){
   echo -e "\n\n ${redColor} [!] Exiting...${endColor}\n"
@@ -35,22 +36,29 @@ function searchMachine(){
 }
 
 function updateMachineFile(){
-  if [ -f "$bunble" ]; then
-    echo -e "\n${greenColor}[*]${endColor} Machines File Already exist."
-    #if [ isdiff ]; then
-     # echo -e "Machine file is Already up to Date.\nYou have the most recents machines uploaded to search."
-     # rm file
-    #else
-     # echo "[*] Machines file succesfully updated."
-    #fi
-  else #downloading the machine
-    tput civis
-    echo -e "\n${greenColor}[+]${endColor} Downloading the Machines files required ...\n"
+  tput civis
+  if [ -f "$bundle" ]; then #Update the machines
+    echo -e "\n${greenColor}[*]${endColor} Machines Files Already exist. Checking for updates ..."
+    curl -s "$main_link" > "$temp"
+    js-beautify "$temp" | sponge "$temp"
+    bundlemd5=$(md5sum "$bundle" | awk '{print $1}')
+    tempmd5=$( md5sum "$temp" | awk '{print $1}')
+    if [ "$bundlemd5" == "$tempmd5" ]; then
+      echo -e "\n${greenColor}[*]${endColor} Machine file is Already up to Date.\n\n${greenColor}[*]${endColor} You have the most recents machines uploaded and you are ready to search (use -m to search for a machine)."
+      rm $temp
+    else
+      echo -e "\n${greenColor}[*]${endColor} Updating machines files ..."
+      cat "$temp" > "$bundle"
+      rm $temp
+      echo -e "\n${greenColor}[*]${endColor} Machines file succesfully updated."
+    fi
+  else #downloading the machines
+    echo -e "\n${greenColor}[+]${endColor} Downloading the Machines Files required ...\n"
     curl -s "$main_link" > "$bundle"
     js-beautify "$bundle" | sponge "$bundle"
-    echo -e "\n${greenColor}[*]${endColor} All the Machine File has been downloaded.\n"
-
-fi
+    echo -e "\n${greenColor}[*]${endColor} All the Machines Files has been downloaded.\n"
+  fi
+  tput cnorm
 }
 
 #function searchByOs(){
