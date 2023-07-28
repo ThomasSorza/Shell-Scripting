@@ -99,12 +99,17 @@ while getopts "m:hi:u" arg; do
   esac
 done
 
-if [ $parameter_counter -eq 1 ]; then
-  searchMachine $machine_name
-elif [ $parameter_counter -eq 2 ]; then
-  updateMachineFile
-elif [ $parameter_counter -eq 3 ]; then
-  searchByIp $ipAdd
-else
-  helpPanel
-fi
+case $parameter_counter in
+  1)
+    searchMachine "$machine_name"
+    ;;
+  2)
+    updateMachineFile
+    ;;
+  3)
+    searchByIp "$ipAdd"
+    ;;
+  *)
+    helpPanel
+    ;;
+esac
