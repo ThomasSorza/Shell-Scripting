@@ -31,6 +31,7 @@ function helpPanel(){
   echo -e "\t ${turquoiseColor} -h: ${endColor} ${grayColor}Display this help panel.${endColor}\n"
   echo -e "\t ${turquoiseColor} -u: ${endColor} ${grayColor}Update the Machine File.${endColor}\n"
   echo -e "\t ${turquoiseColor} -o: ${endColor} ${purpleColor}[operating_system]${endColour} ${grayColor} Search machines by operating system. ${endColor}\n"
+  echo -e "\t ${turquoiseColor} -s: ${endColor} ${purpleColor}[skills]${endColour} ${grayColor} Search machines by required Skills. ${endColor}\n"
   echo -e "\t ${turquoiseColor} -i: ${endColor} ${purpleColor}[ip_address]${endColour} ${grayColor} Search machines by IP address. ${endColor}\n"
   echo -e "\t ${turquoiseColor} -y: ${endColor} ${purpleColor}[machine_name]${endColour} ${grayColor} Get the youtube resolution link by machine name. ${endColor}\n"
   echo -e "\t ${turquoiseColor} -d: ${endColor} ${purpleColor}[machine_difficulty_level]${endColour} ${grayColor} Search Machines by machine difficulty level. ${endColor}\n\t\t Select difficulty levels:\n\t\t${blueColor} E ${endColor}: Easy Machines.\n\t\t${blueColor} M ${endColor}: Medium Machines.\n\t\t${blueColor} H ${endColor}: Hard Machines.\n\t\t${blueColor} I ${endColor}: Insane Machines.\n\t\t Example:\n\t\t bash> htbMachines.sh -d E ${yellowColor}[ Displaying Easy machines ]${endColor}"
@@ -76,7 +77,7 @@ function searchMachine(){
 function searchByIp(){
   ip=$1
   if grep -q "$ip" $bundle; then
-    machineName=$(grep -B 3 "\"$ip\"" $bundle | grep "name:" | awk NF'{print $NF}' | tr -d '"|,')
+    machineName=$(grep -B 3 "\"$ip\"" $bundle | grep "name: " | awk NF'{print $NF}' | tr -d '"|,')
     searchMachine $machineName
   else
     echo -e "\n${redColor}[!] ERROR:${endColor} IP address $ip do not exist or is not found.\n"
@@ -95,19 +96,19 @@ function getYtLink(){
 function searchByDif(){
   difficulty=$1
   if [ "$difficulty" == "E" ]; then
-    machinesBydif=$(grep -B 5 -P "dificultad: \"Fácil\"" $bundle | grep name | tr -d '"|,' | awk NF'{print $NF}')
+    machinesBydif=$(grep -B 5 -P "dificultad: \"Fácil\"" $bundle | grep "name: " | tr -d '"|,' | awk NF'{print $NF}')
     echo -e "\n${greenColor}[*] Displaying Easy Machines :) ${endColor}"
     echo -e "$machinesBydif" | column
   elif [ "$difficulty" == "M" ]; then
-    machinesBydif=$(grep -B 5 "dificultad: \"Media\"" $bundle | grep name | tr -d '"|,' | awk NF'{print $NF}')
+    machinesBydif=$(grep -B 5 "dificultad: \"Media\"" $bundle | grep "name: " | tr -d '"|,' | awk NF'{print $NF}')
     echo -e "\n${greenColor}[*] Displaying Medium Machines :) ${endColor}"
     echo -e "$machinesBydif" | column
   elif [ "$difficulty" == "H" ]; then
-    machinesBydif=$(grep -B 5 "dificultad: \"Difícil\"" $bundle | grep name | tr -d '"|,' | awk NF'{print $NF}')
+    machinesBydif=$(grep -B 5 "dificultad: \"Difícil\"" $bundle | grep "name: " | tr -d '"|,' | awk NF'{print $NF}')
     echo -e "\n${greenColor}[*] Displaying Hard Machines :) ${endColor}"
     echo -e "$machinesBydif" | column
   elif [ "$difficulty" == "I" ]; then
-    machinesBydif=$(grep -B 5 "dificultad: \"Insane\"" $bundle | grep name | tr -d '"|,' | awk NF'{print $NF}')
+    machinesBydif=$(grep -B 5 "dificultad: \"Insane\"" $bundle | grep "name: " | tr -d '"|,' | awk NF'{print $NF}')
     echo -e "\n${greenColor}[*] Displaying Insane Machines :) ${endColor}"
     echo -e "$machinesBydif" | column
   else
@@ -115,23 +116,29 @@ function searchByDif(){
   fi
 }
 
-#function searchByOs(){
-  #TODO: Search by OS
-#}
+function searchByOs(){
+  os=$1
+  osFiltered=$(grep -B 7 "so: \"$os\"" data/bundle.js | grep "name: " | awk NF'{print $NF}' | tr -d '"|,')
+  if [ "$osFiltered" ]; then
+    echo -e "\n${yellowColor}[*]${endColor} Showing all the ${greenColor}$os${endColor} machines: \n\n $(echo "$osFiltered" | column)"
+  else
+    echo -e "\n${redColor}[!] ERROR:${endColor} Difficulty level named \"$os\" do not exist.\n"
+  fi
+}
 
 #Indicator
 declare -i parameter_counter=0
 
 #TODO add -o option for OS
-while getopts "m:hi:y:d:u" arg; do
+while getopts "m:hi:y:d:o:u" arg; do
   case $arg in
     m) machine_name="$OPTARG"; let parameter_counter+=1;;
     h) ;;
     i) ipAdd="$OPTARG"; let parameter_counter+=3;;
     y) machine_name="$OPTARG"; let parameter_counter+=4;;
     d) difficulty="$OPTARG"; let parameter_counter+=5;;
+    o) os="$OPTARG"; let parameter_counter+=6;;
     u) parameter_counter+=2;;
-    #0) searchByOS;;
   esac
 done
 
@@ -150,6 +157,9 @@ case $parameter_counter in
     ;;
   5)
     searchByDif "$difficulty"
+    ;;
+  6)
+    searchByOs "$os"
     ;;
   *)
     helpPanel
