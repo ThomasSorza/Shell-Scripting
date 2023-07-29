@@ -31,7 +31,7 @@ function helpPanel(){
   echo -e "\t ${turquoiseColor} -h: ${endColor} ${grayColor}Display this help panel.${endColor}\n"
   echo -e "\t ${turquoiseColor} -u: ${endColor} ${grayColor}Update the Machine File.${endColor}\n"
   echo -e "\t ${turquoiseColor} -o: ${endColor} ${purpleColor}[operating_system]${endColour} ${grayColor} Search machines by operating system. ${endColor}\n"
-  echo -e "\t ${turquoiseColor} -s: ${endColor} ${purpleColor}[skills]${endColour} ${grayColor} Search machines by required Skills. ${endColor}\n"
+  echo -e "\t ${turquoiseColor} -s: ${endColor} ${purpleColor}[skills]${endColour} ${grayColor} Search machines by required Skills. ${endColor}\n\t\t Note: use double quotes to search by a skill with multiple words. Example \"Active Directory\"\n"
   echo -e "\t ${turquoiseColor} -i: ${endColor} ${purpleColor}[ip_address]${endColour} ${grayColor} Search machines by IP address. ${endColor}\n"
   echo -e "\t ${turquoiseColor} -y: ${endColor} ${purpleColor}[machine_name]${endColour} ${grayColor} Get the youtube resolution link by machine name. ${endColor}\n"
   echo -e "\t ${turquoiseColor} -d: ${endColor} ${purpleColor}[machine_difficulty_level]${endColour} ${grayColor} Search Machines by machine difficulty level. ${endColor}\n\t\t Select difficulty levels:\n\t\t${blueColor} E ${endColor}: Easy Machines.\n\t\t${blueColor} M ${endColor}: Medium Machines.\n\t\t${blueColor} H ${endColor}: Hard Machines.\n\t\t${blueColor} I ${endColor}: Insane Machines.\n\t\t Example:\n\t\t bash> htbMachines.sh -d E ${yellowColor}[ Displaying Easy machines ]${endColor}"
@@ -126,42 +126,90 @@ function searchByOs(){
   fi
 }
 
+function getOsAndDifficultyMachine(){
+  difficulty="$1"
+  os="$2"
+ if [ "$difficulty" == "E" ]; then
+    searchResults=$(grep -B 5 "dificultad: \"Fácil\"" $bundle | grep "so: \"$os\"" -B 4 | grep "name: " | tr -d '"|,' | awk NF'{print $NF}')
+    echo -e "\n${greenColor}[*] Displaying Easy and $os Machines :) ${endColor}"
+    echo -e "$searchResults" | column
+  elif [ "$difficulty" == "M" ]; then
+    searchResults=$(grep -B 5 "dificultad: \"Media\"" $bundle | grep "so: \"$os\"" -B 4 | grep "name: " | tr -d '"|,' | awk NF'{print $NF}')
+    echo -e "\n${greenColor}[*] Displaying Medium and $os Machines :) ${endColor}"
+    echo -e "$searchResults" | column
+  elif [ "$difficulty" == "H" ]; then
+    searchResults=$(grep -B 5 "dificultad: \"Difícil\"" $bundle | grep "so: \"$os\"" -B 4 | grep "name: " | tr -d '"|,' | awk NF'{print $NF}')
+    echo -e "\n${greenColor}[*] Displaying Hard and $os Machines :) ${endColor}"
+    echo -e "$searchResults" | column
+  elif [ "$difficulty" == "I" ]; then
+    searchResults=$(grep -B 5 "dificultad: \"Insane\"" $bundle | grep "so: \"$os\"" -B 4 | grep "name: " | tr -d '"|,' | awk NF'{print $NF}')
+    echo -e "\n${greenColor}[*] Displaying Insane and $os Machines :) ${endColor}"
+    echo -e "$searchResults" | column
+  else
+    echo -e "\n${redColor}[!] ERROR:${endColor} Difficulty level named \"$difficulty\" or \"$os\" do not exist.\n"
+  fi
+}
+
+function searchBySkills(){
+  skill=$1
+  machineName=$(grep -B 6 -i "$skill" $bundle | grep "name: " | awk NF'{print $NF}' | tr -d '"|,')
+  if [ "$machineName" ]; then
+    echo -e "\n${greenColor}[*] Displaying machines with $skill required skill :) ${endColor}"
+    echo -e "$machineName" | column
+  else
+    echo -e "\n${redColor}[!] ERROR:${endColor} Skill \"$skill\" do not exist or is not found.\n"
+  fi
+}
+
 #Indicator
 declare -i parameter_counter=0
 
+#Combinations
+declare -i os_comb=0
+declare -i difficulty_comb=0
+
 #TODO add -o option for OS
-while getopts "m:hi:y:d:o:u" arg; do
+while getopts "m:hi:y:d:o:s:u" arg; do
   case $arg in
     m) machine_name="$OPTARG"; let parameter_counter+=1;;
     h) ;;
     i) ipAdd="$OPTARG"; let parameter_counter+=3;;
     y) machine_name="$OPTARG"; let parameter_counter+=4;;
-    d) difficulty="$OPTARG"; let parameter_counter+=5;;
-    o) os="$OPTARG"; let parameter_counter+=6;;
+    d) difficulty="$OPTARG"; difficulty_comb=1; let parameter_counter+=5;;
+    o) os="$OPTARG"; os_comb=1; let parameter_counter+=6;;
+    s) skill="$OPTARG"; let parameter_counter+=7;;
     u) parameter_counter+=2;;
   esac
 done
 
 case $parameter_counter in
-  1)
+  1) #-m
     searchMachine "$machine_name"
     ;;
-  2)
+  2) #-u
     updateMachineFile
     ;;
-  3)
+  3) #-i
     searchByIp "$ipAdd"
     ;;
-  4)
+  4) #-y
     getYtLink "$machine_name"
     ;;
-  5)
+  5) #-d
     searchByDif "$difficulty"
     ;;
-  6)
+  6) #-o
     searchByOs "$os"
     ;;
+  7)
+    searchBySkills "$skill"
+    ;;
   *)
-    helpPanel
+    if [ $os_comb -eq 1 ] && [ $difficulty_comb -eq 1 ]; then
+      getOsAndDifficultyMachine "$difficulty" "$os"
+    else
+      helpPanel
+    fi
     ;;
 esac
+
