@@ -30,12 +30,48 @@ function martingala(){
   echo -e "\n [*] Playing with the Martingala technique.\n"
   echo -ne "\n [*] Enter the amount of the bet -> " && read bet
   echo -ne "\n [*] Enter the bet (even/odd) ->" && read even_odd
-  echo -e "\n [*] Playing with $bet to $even_odd"
+  echo -e "\n [*] Playing with $bet to $even_odd\n"
   tput civis #hide the cursor
-  #TODO: get the condition of the while to evaluate the money and the bet
+  profit=0
+  plays=0
   while true; do
-    roulette="$(($RANDOM % 37))"
-    echo -e "\n [*] number: $roulette"
+    plays=$((plays+1))
+    money=$(($money-$bet))
+    echo -e "[*] You are betting $bet You have $money"
+    if [ $money -ge 0 ]; then
+      roulette="$(($RANDOM % 37))"
+      echo -e "[*] Roulette number: $roulette"
+      if [ $roulette -eq 0 ]; then
+        echo -e "[*] You get zero, you lose."
+        bet=$(($bet*2))
+      elif [ $(($roulette % 2)) -eq 0 ]; then #evaluate if is even
+          echo -e "[*] You get an even number"
+        if [ "$even_odd" == "even" ]; then #check if the user bet to even
+          profit=$((2*$bet))
+          money=$(($money+$profit))
+          echo -e "[*] You win $profit and now you have $money"
+        elif [ "$even_odd" == "odd" ]; then
+          echo -e "${redColor}[*] You loose, number is not even.${endColor}"
+          bet=$(($bet*2))
+        fi
+      elif [ $(($roulette % 2)) -eq 1 ]; then #evaluate if is odd
+          echo -e "[*] You get an odd number"
+        if [ "$even_odd" == "odd" ]; then #check if we user bet to odd
+          profit=$((2*$bet))
+          money=$(($money+$profit))
+          echo -e "[*] You win you win $profit and now you have $money"
+        elif [ "$even_odd" == "even" ]; then
+          echo -e "${redColor}[*] You loose, number is not odd.${endColor}"
+          bet=$(($bet*2))
+        fi
+        echo -e "[*] You have $money"
+      fi
+    else
+      echo -e "${redColor}[*] You loose, you loose all your money.${endColor}"
+      echo -e "${redColor}[*] You played $plays times.${endColor}"
+      tput cnorm; exit 0
+    fi
+    echo -e " ------------------------- \n"
   done
   tput cnorm
 }
