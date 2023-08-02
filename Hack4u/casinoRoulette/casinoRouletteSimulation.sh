@@ -34,37 +34,39 @@ function martingala(){
   tput civis #hide the cursor
   profit=0
   plays=0
+  bad_plays=""
   while true; do
     plays=$((plays+1))
     money=$(($money-$bet))
-    echo -e "[*] You are betting $bet You have $money"
+#    echo -e "[*] You are betting $bet You have $money"
     if [ $money -ge 0 ]; then
       roulette="$(($RANDOM % 37))"
-      echo -e "[*] Roulette number: $roulette"
+#      echo -e "[*] Roulette number: $roulette"
       if [ $roulette -eq 0 ]; then
-        echo -e "[*] You get zero, you lose."
+#        echo -e "[*] You get zero, you lose."
         bet=$(($bet*2))
+
       elif [ $(($roulette % 2)) -eq 0 ]; then #evaluate if is even
-          echo -e "[*] You get an even number"
+#          echo -e "[*] You get an even number"
         if [ "$even_odd" == "even" ]; then #check if the user bet to even
           profit=$((2*$bet))
           money=$(($money+$profit))
-          echo -e "[*] You win $profit and now you have $money"
+#          echo -e "[*] You win $profit and now you have $money"
         elif [ "$even_odd" == "odd" ]; then
-          echo -e "${redColor}[*] You loose, number is not even.${endColor}"
+#          echo -e "${redColor}[*] You loose, number is not even.${endColor}"
           bet=$(($bet*2))
         fi
       elif [ $(($roulette % 2)) -eq 1 ]; then #evaluate if is odd
-          echo -e "[*] You get an odd number"
+#          echo -e "[*] You get an odd number"
         if [ "$even_odd" == "odd" ]; then #check if we user bet to odd
           profit=$((2*$bet))
           money=$(($money+$profit))
-          echo -e "[*] You win you win $profit and now you have $money"
+#          echo -e "[*] You win you win $profit and now you have $money"
         elif [ "$even_odd" == "even" ]; then
-          echo -e "${redColor}[*] You loose, number is not odd.${endColor}"
+#          echo -e "${redColor}[*] You loose, number is not odd.${endColor}"
           bet=$(($bet*2))
         fi
-        echo -e "[*] You have $money"
+#        echo -e "[*] You have $money"
       fi
     else
       echo -e "${redColor}[*] You loose, you loose all your money.${endColor}"
